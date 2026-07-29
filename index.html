@@ -5,16 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Milo Rourke — Video Editor for Creators</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="grain"></div>
-
 <header class="nav">
   <div class="nav-inner">
     <a href="#top" class="wordmark">MILO ROURKE</a>
+    <nav class="nav-links">
+      <a href="#work">Work</a>
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#faq">FAQ</a>
+    </nav>
     <a href="#contact" class="nav-cta">Get in touch</a>
   </div>
 </header>
@@ -24,7 +28,7 @@
   <!-- HERO -->
   <section class="hero">
     <div class="hero-inner">
-      <p class="eyebrow mono">00:00:00:00 — VIDEO EDITOR</p>
+      <p class="eyebrow mono">● CURRENTLY TAKING ON NEW PROJECTS</p>
       <h1 class="hero-title">I cut the<br>boring parts.</h1>
       <p class="hero-sub">I edit long-form and short-form video for YouTube creators who'd rather film than sit in a timeline for twelve hours. Sharp cuts, clean pacing, no fluff.</p>
       <a href="#work" class="hero-link">See the work ↓</a>
@@ -50,6 +54,37 @@
         <div class="frame" style="--h:50;"></div>
       </div>
       <div class="playhead"></div>
+    </div>
+  </section>
+
+  <!-- SIGNATURE QUOTE -->
+  <section class="quote-block">
+    <div class="stars" aria-hidden="true">★★★★★</div>
+    <p class="quote-text">"The edit is where the story actually gets told — not on set, not in the footage."</p>
+    <p class="quote-attr mono">— Milo Rourke, Video Editor</p>
+  </section>
+
+  <!-- WHY WORK WITH ME -->
+  <section class="why">
+    <h2 class="why-title">Why work with me</h2>
+    <p class="why-subtitle">A few things that make this different.</p>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <span class="why-emoji" aria-hidden="true">🎬</span>
+        <h3>Direct access</h3>
+        <p>You talk to me, not an account manager.</p>
+      </div>
+      <div class="why-card">
+        <span class="why-emoji" aria-hidden="true">🎯</span>
+        <h3>Retention-first cuts</h3>
+        <p>Every pacing choice is made to keep people watching.</p>
+      </div>
+      <div class="why-card">
+        <span class="why-emoji" aria-hidden="true">👀</span>
+        <h3>See before you pay</h3>
+        <p>You get a preview before any final payment.</p>
+      </div>
     </div>
   </section>
 
@@ -107,77 +142,155 @@
   </section>
 
   <!-- SERVICES -->
-  <section class="services">
+  <section class="services card-section" id="services">
     <p class="section-label mono">// WHAT I DO</p>
 
     <div class="services-grid">
       <div class="service">
+        <span class="service-icon" aria-hidden="true">🎞️</span>
         <h3>Long-form Editing</h3>
-        <p>Full YouTube videos, structured for retention — pacing, sound design, and cuts that keep people watching past minute two.</p>
+        <p>Full videos, cut for retention.</p>
+        <ul class="service-tags mono">
+          <li>Retention pacing</li>
+          <li>Sound design</li>
+          <li>Story structure</li>
+        </ul>
       </div>
       <div class="service">
+        <span class="service-icon" aria-hidden="true">📱</span>
         <h3>Shorts &amp; Reels</h3>
-        <p>Vertical cuts built for the first second. Fast hooks, captions, and pacing tuned for how people actually scroll.</p>
+        <p>Fast, scroll-stopping vertical cuts.</p>
+        <ul class="service-tags mono">
+          <li>Fast hooks</li>
+          <li>Auto captions</li>
+          <li>Scroll-tuned pacing</li>
+        </ul>
       </div>
       <div class="service">
+        <span class="service-icon" aria-hidden="true">🎨</span>
         <h3>Color Grading</h3>
-        <p>Consistent, intentional color across a whole channel — so every upload looks like it belongs to the same creator.</p>
+        <p>One consistent look, every upload.</p>
+        <ul class="service-tags mono">
+          <li>Channel-wide LUTs</li>
+          <li>Skin tone accuracy</li>
+          <li>Mood matching</li>
+        </ul>
       </div>
       <div class="service">
+        <span class="service-icon" aria-hidden="true">✨</span>
         <h3>Motion Graphics</h3>
-        <p>Lower thirds, transitions, and title cards that feel custom to your channel, not stock templates.</p>
+        <p>Custom titles, never stock templates.</p>
+        <ul class="service-tags mono">
+          <li>Custom lower thirds</li>
+          <li>Title cards</li>
+          <li>Smooth transitions</li>
+        </ul>
       </div>
     </div>
   </section>
 
   <!-- PROCESS -->
-  <section class="process">
+  <section class="process card-section" id="process">
     <p class="section-label mono">// HOW IT WORKS</p>
 
-    <div class="process-list">
+    <div class="process-grid">
       <div class="process-step">
         <span class="process-num mono">01</span>
-        <div>
-          <h3>Import &amp; Sync</h3>
-          <p>Footage, audio, and your notes come in. Everything gets organized and synced before a single cut is made.</p>
-        </div>
+        <h3>Import &amp; Sync</h3>
+        <p>Footage and notes come in, everything gets organized first.</p>
       </div>
       <div class="process-step">
         <span class="process-num mono">02</span>
-        <div>
-          <h3>Story Cut</h3>
-          <p>A rough edit focused purely on structure and pacing — getting the story right before anything is polished.</p>
-        </div>
+        <h3>Story Cut</h3>
+        <p>A rough edit focused on structure and pacing.</p>
       </div>
       <div class="process-step">
         <span class="process-num mono">03</span>
-        <div>
-          <h3>Polish &amp; Grade</h3>
-          <p>Sound design, color, graphics, and captions. This is where it goes from "cut" to "finished."</p>
-        </div>
+        <h3>Polish &amp; Grade</h3>
+        <p>Sound, color, graphics, and captions added in.</p>
       </div>
       <div class="process-step">
         <span class="process-num mono">04</span>
-        <div>
-          <h3>Deliver</h3>
-          <p>Export in whatever formats you need, plus one round of revisions included.</p>
-        </div>
+        <h3>Deliver</h3>
+        <p>Exported in your format, one revision round included.</p>
       </div>
     </div>
   </section>
 
   <!-- TESTIMONIALS -->
   <section class="testimonials">
-    <p class="section-label mono">// WHAT CLIENTS SAY</p>
+    <p class="section-label mono">// HEAR FROM MY USERS</p>
     <div class="testimonial-grid">
-      <blockquote class="testimonial">
-        <p>"Placeholder — this is where a client quote will go once you have your first one."</p>
-        <cite>— Client name, channel/company</cite>
-      </blockquote>
-      <blockquote class="testimonial">
-        <p>"Placeholder — swap this for real feedback after your first project together."</p>
-        <cite>— Client name, channel/company</cite>
-      </blockquote>
+      <div class="testimonial">
+        <div class="testimonial-stars" aria-hidden="true">★★★★★</div>
+        <p class="testimonial-quote">"Placeholder — this is where a client quote will go once you have your first one."</p>
+        <p class="testimonial-name">Client name<span>Channel / Company</span></p>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars" aria-hidden="true">★★★★★</div>
+        <p class="testimonial-quote">"Placeholder — swap this for real feedback after your first project together."</p>
+        <p class="testimonial-name">Client name<span>Channel / Company</span></p>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars" aria-hidden="true">★★★★★</div>
+        <p class="testimonial-quote">"Placeholder — a third review will slot in here once you've delivered a few projects."</p>
+        <p class="testimonial-name">Client name<span>Channel / Company</span></p>
+      </div>
+    </div>
+    <div class="trust-badge">New clients welcome</div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <p class="section-label mono">// QUESTIONS</p>
+    <h2 class="faq-title">Before you reach out.</h2>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>How much does it cost?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Most single-video projects run $100-150, depending on length and complexity. You'll always know the price before anything is final.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>How long does delivery take?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>5-7 days for most projects. If you need something faster, tell me upfront and I'll let you know if it's possible.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>What if I don't like the first cut?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>One round of revisions is included in every project, so we can adjust pacing, cuts, or graphics before it's final.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>What do you need from me to get started?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Raw footage, any brand guidelines or reference videos, and a short form filled out so I understand your style and audience.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>Do you sign an NDA if needed?</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Yes, no problem — just let me know before we start and I'll send one over.</p>
+        </div>
+      </div>
     </div>
   </section>
 

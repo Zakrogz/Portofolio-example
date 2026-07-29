@@ -1,7 +1,7 @@
 // Simple scroll-reveal: fade/slide up sections as they enter the viewport.
 document.addEventListener("DOMContentLoaded", () => {
   const targets = document.querySelectorAll(
-    ".reel, .service, .process-step, .testimonial"
+    ".reel, .service, .process-step, .testimonial, .why-card, .stat"
   );
 
   targets.forEach((el) => {
@@ -33,4 +33,20 @@ document.addEventListener("DOMContentLoaded", () => {
       el.style.transform = "none";
     });
   }
+
+  // FAQ accordion — only one answer open at a time
+  const faqItems = document.querySelectorAll(".faq-item");
+
+  faqItems.forEach((item) => {
+    const question = item.querySelector(".faq-question");
+    question.addEventListener("click", () => {
+      const isOpen = item.classList.contains("open");
+
+      faqItems.forEach((other) => other.classList.remove("open"));
+
+      if (!isOpen) {
+        item.classList.add("open");
+      }
+    });
+  });
 });
