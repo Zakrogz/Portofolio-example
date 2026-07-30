@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diego Soler — Montaje de vídeo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101114;
+    --bg-alt:#17181c;
+    --bg-alt-2:#1c1e23;
+    --ink:#f2f1ed;
+    --muted:#8b8d93;
+    --muted-2:#5c5e64;
+    --teal:#3ecdbb;
+    --teal-dim:#2a8f83;
+    --orange:#ff7a3d;
+    --orange-dim:#c95d2b;
+    --line:#2a2c31;
+    --line-soft:#212228;
+    --radius:2px;
+    --display: 'Big Shoulders Display', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+  }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.5;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:999;
+    opacity:0.035;
+    mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  ::selection{ background:var(--teal); color:#08110f; }
+
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+  ul{ list-style:none; }
+  img{ max-width:100%; display:block; }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--teal);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:16px; height:1px;
+    background:var(--teal);
+    display:inline-block;
+  }
+
+  /* ---------- NAV / TIMELINE SCRUBBER ---------- */
+  header.timeline-nav{
+    position:fixed;
+    top:0; left:0; right:0;
+    z-index:500;
+    background:rgba(16,17,20,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-row{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+    height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+  }
+  .brand{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:19px;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .brand span{ color:var(--teal); }
+
+  .clip-markers{
+    display:flex;
+    gap:2px;
+    flex:1;
+    justify-content:center;
+  }
+  .clip-marker{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--muted-2);
+    padding:8px 14px;
+    border-radius:var(--radius);
+    transition:color .25s ease, background .25s ease;
+    white-space:nowrap;
+  }
+  .clip-marker:hover{ color:var(--ink); background:var(--bg-alt); }
+  .clip-marker.active{ color:var(--teal); background:var(--bg-alt); }
+
+  .tc-readout{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    white-space:nowrap;
+  }
+  .tc-readout .dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--orange);
+    box-shadow:0 0 8px var(--orange);
+    animation:pulse-dot 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse-dot{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+  .tc-readout .num{ color:var(--ink); font-weight:500; }
+
+  .scrub-track{
+    height:2px;
+    width:100%;
+    background:var(--line);
+    position:relative;
+  }
+  .scrub-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--teal), var(--orange));
+  }
+
+  @media (max-width:860px){
+    .clip-markers{ display:none; }
+  }
+
+  main{ padding-top:60px; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:96px 0 88px;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    top:-30%; right:-10%;
+    width:640px; height:640px;
+    background:radial-gradient(circle, rgba(62,205,187,0.10), transparent 68%);
+    pointer-events:none;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:56px;
+    align-items:end;
+  }
+  @media (max-width:900px){
+    .hero-grid{ grid-template-columns:1fr; }
+  }
+
+  .hero h1{
+    font-family:var(--display);
+    font-weight:900;
+    text-transform:uppercase;
+    font-size:clamp(40px, 6.4vw, 78px);
+    line-height:0.98;
+    letter-spacing:0.005em;
+    margin:18px 0 24px;
+  }
+  .hero h1 .accent{ color:var(--teal); }
+
+  .hero p.lede{
+    font-size:17px;
+    color:var(--muted);
+    max-width:52ch;
+    margin-bottom:34px;
+  }
+
+  .cta-row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .btn{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    padding:14px 24px;
+    border-radius:var(--radius);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    transition:transform .2s ease, background .2s ease, border-color .2s ease;
+  }
+  .btn-primary{
+    background:var(--teal);
+    color:#07130f;
+    font-weight:700;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); background:#5adcca; }
+  .btn-ghost{
+    border:1px solid var(--line);
+    color:var(--ink);
+  }
+  .btn-ghost:hover{ border-color:var(--orange); color:var(--orange); transform:translateY(-2px); }
+
+  /* Player frame */
+  .player{
+    position:relative;
+    background:var(--bg-alt);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    aspect-ratio:16/10;
+    overflow:hidden;
+  }
+  .corner{ position:absolute; width:20px; height:20px; opacity:.9; }
+  .corner.tl{ top:10px; left:10px; border-top:2px solid var(--teal); border-left:2px solid var(--teal); }
+  .corner.tr{ top:10px; right:10px; border-top:2px solid var(--teal); border-right:2px solid var(--teal); }
+  .corner.bl{ bottom:10px; left:10px; border-bottom:2px solid var(--teal); border-left:2px solid var(--teal); }
+  .corner.br{ bottom:10px; right:10px; border-bottom:2px solid var(--teal); border-right:2px solid var(--teal); }
+
+  .player-tc{
+    position:absolute;
+    top:14px; left:38px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.04em;
+  }
+  .player-inout{
+    position:absolute;
+    top:14px; right:38px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  .play-btn{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-58%);
+    width:60px; height:60px;
+    border-radius:50%;
+    border:1px solid rgba(242,241,237,0.35);
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(16,17,20,0.4);
+    backdrop-filter:blur(2px);
+  }
+  .play-btn svg{ width:16px; height:16px; margin-left:3px; fill:var(--ink); }
+
+  .waveform{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    height:56px;
+    display:flex;
+    align-items:flex-end;
+    gap:3px;
+    padding:0 16px 12px;
+    background:linear-gradient(180deg, transparent, rgba(0,0,0,0.35));
+  }
+  .waveform .bar{
+    flex:1;
+    background:linear-gradient(180deg, var(--teal), var(--orange));
+    opacity:0.55;
+    border-radius:1px;
+    animation:wave 2.4s ease-in-out infinite;
+  }
+  @keyframes wave{ 0%,100%{ transform:scaleY(0.3);} 50%{ transform:scaleY(1);} }
+
+  .player-label{
+    position:absolute;
+    bottom:64px; left:16px;
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--muted-2);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{ padding:96px 0; border-bottom:1px solid var(--line); }
+  .section-head{ margin-bottom:52px; max-width:64ch; }
+  .section-head h2{
+    font-family:var(--display);
+    font-weight:800;
+    text-transform:uppercase;
+    font-size:clamp(28px, 3.4vw, 42px);
+    margin-top:14px;
+    line-height:1.02;
+  }
+  .section-head p{ color:var(--muted); margin-top:14px; font-size:15.5px; max-width:56ch; }
+
+  .reveal{ opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ---------- TRABAJOS / PORTFOLIO ---------- */
+  .grid-work{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:22px;
+  }
+  @media (max-width:900px){ .grid-work{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .grid-work{ grid-template-columns:1fr; } }
+
+  .clip-card{
+    position:relative;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    background:var(--bg-alt);
+    transition:border-color .25s ease, transform .25s ease;
+  }
+  .clip-card:hover{ border-color:var(--teal); transform:translateY(-4px); }
+
+  .clip-thumb{
+    aspect-ratio:16/10;
+    position:relative;
+    overflow:hidden;
+  }
+  .clip-thumb .grad{
+    position:absolute; inset:0;
+  }
+  .g1{ background:linear-gradient(135deg,#1f4b46,#3ecdbb 60%,#ff7a3d); }
+  .g2{ background:linear-gradient(135deg,#2b2530,#c95d2b 55%,#3ecdbb); }
+  .g3{ background:linear-gradient(135deg,#12262b,#2a8f83 50%,#101114); }
+  .g4{ background:linear-gradient(135deg,#3a2416,#ff7a3d 45%,#1c1e23); }
+  .g5{ background:linear-gradient(135deg,#101114,#3ecdbb 30%,#2a2c31); }
+  .g6{ background:linear-gradient(135deg,#241b12,#c95d2b 40%,#3ecdbb); }
+
+  .clip-thumb::after{
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0 1px, transparent 1px 3px);
+    opacity:0.5;
+  }
+  .duration-badge{
+    position:absolute; bottom:10px; right:10px;
+    font-family:var(--mono);
+    font-size:11px;
+    background:rgba(16,17,20,0.75);
+    padding:3px 8px;
+    border-radius:2px;
+    z-index:2;
+  }
+  .scan{
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+    transform:translateX(-120%);
+    transition:transform .6s ease;
+    z-index:2;
+  }
+  .clip-card:hover .scan{ transform:translateX(120%); }
+
+  .clip-body{ padding:16px 18px 20px; }
+  .clip-tag{
+    font-family:var(--mono);
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--orange);
+  }
+  .clip-title{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:19px;
+    text-transform:uppercase;
+    margin-top:6px;
+    letter-spacing:0.01em;
+  }
+
+  /* ---------- PROCESO ---------- */
+  .timeline-list{
+    position:relative;
+    border-left:1px solid var(--line);
+    margin-left:6px;
+  }
+  .tstep{
+    position:relative;
+    padding:0 0 44px 32px;
+  }
+  .tstep:last-child{ padding-bottom:0; }
+  .tstep::before{
+    content:"";
+    position:absolute;
+    left:-5px; top:2px;
+    width:9px; height:9px;
+    border-radius:50%;
+    background:var(--bg);
+    border:2px solid var(--teal);
+  }
+  .tstep .tc{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--teal);
+    letter-spacing:0.05em;
+  }
+  .tstep h3{
+    font-family:var(--display);
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:22px;
+    margin:6px 0 8px;
+  }
+  .tstep p{ color:var(--muted); max-width:58ch; font-size:15px; }
+
+  /* ---------- SERVICIOS ---------- */
+  .grid-services{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  @media (max-width:900px){ .grid-services{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .grid-services{ grid-template-columns:1fr;} }
+
+  .service-card{
+    background:var(--bg);
+    padding:30px 24px;
+    transition:background .25s ease;
+  }
+  .service-card:hover{ background:var(--bg-alt); }
+  .service-card svg{ width:26px; height:26px; stroke:var(--teal); margin-bottom:20px; }
+  .service-card h3{
+    font-family:var(--display);
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:18px;
+    margin-bottom:10px;
+  }
+  .service-card p{ color:var(--muted); font-size:14px; margin-bottom:16px; }
+  .service-tags{ display:flex; flex-wrap:wrap; gap:6px; }
+  .service-tags span{
+    font-family:var(--mono);
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--muted-2);
+    border:1px solid var(--line);
+    padding:3px 7px;
+    border-radius:2px;
+  }
+
+  /* ---------- TESTIMONIOS ---------- */
+  .grid-notes{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+  }
+  @media (max-width:900px){ .grid-notes{ grid-template-columns:1fr; } }
+  .note-card{
+    background:var(--bg-alt);
+    border:1px solid var(--line);
+    border-left:2px solid var(--orange);
+    border-radius:var(--radius);
+    padding:24px;
+  }
+  .note-tc{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--orange);
+    margin-bottom:12px;
+    display:block;
+  }
+  .note-card p.quote{ font-size:15px; color:var(--ink); margin-bottom:16px; }
+  .note-who{ font-family:var(--mono); font-size:12px; color:var(--muted); }
+  .note-who b{ color:var(--ink); font-weight:600; }
+
+  /* ---------- CONTACTO / EXPORT PANEL ---------- */
+  .export-panel{
+    background:var(--bg-alt);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    max-width:760px;
+    margin:0 auto;
+  }
+  .export-titlebar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 20px;
+    border-bottom:1px solid var(--line);
+    background:var(--bg-alt-2);
+  }
+  .export-titlebar span{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .export-dots{ display:flex; gap:6px; }
+  .export-dots i{ width:8px; height:8px; border-radius:50%; background:var(--muted-2); display:block; }
+
+  .export-body{ padding:32px; }
+  .export-body h2{
+    font-family:var(--display);
+    font-weight:800;
+    text-transform:uppercase;
+    font-size:clamp(26px,3vw,34px);
+  }
+  .export-body > p{ color:var(--muted); margin:10px 0 28px; font-size:15px; }
+
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media (max-width:560px){ .form-row{ grid-template-columns:1fr; } }
+  .field label{
+    display:block;
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    background:var(--bg);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:12px 14px;
+    border-radius:2px;
+    font-family:var(--body);
+    font-size:14px;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none;
+    border-color:var(--teal);
+  }
+  .field textarea{ resize:vertical; min-height:100px; }
+
+  .settings-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 22px;
+    margin:22px 0 28px;
+    padding:14px 16px;
+    border:1px dashed var(--line);
+    border-radius:2px;
+  }
+  .settings-row div{ font-family:var(--mono); font-size:11px; color:var(--muted-2); }
+  .settings-row b{ color:var(--muted); font-weight:500; }
+
+  .render-btn{
+    width:100%;
+    position:relative;
+    background:var(--teal);
+    color:#07130f;
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding:16px;
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .render-btn .fill{
+    position:absolute; inset:0;
+    background:rgba(7,19,15,0.18);
+    width:0%;
+    transition:width .5s ease;
+  }
+  .render-btn:hover .fill{ width:100%; }
+  .render-btn span{ position:relative; z-index:2; }
+
+  .direct-contact{
+    display:flex; gap:22px; flex-wrap:wrap;
+    margin-top:24px;
+    padding-top:24px;
+    border-top:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:12.5px;
+  }
+  .direct-contact a{ color:var(--muted); transition:color .2s ease; }
+  .direct-contact a:hover{ color:var(--teal); }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:40px 0 50px;
+    text-align:center;
+  }
+  footer .fin{
+    font-family:var(--display);
+    font-weight:900;
+    font-size:15px;
+    letter-spacing:0.3em;
+    color:var(--muted-2);
+  }
+  footer p{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted-2);
+    margin-top:10px;
+  }
+
+  :focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<header class="timeline-nav">
+  <div class="nav-row">
+    <div class="brand">DIEGO <span>SOLER</span></div>
+    <nav class="clip-markers" id="clipMarkers">
+      <a class="clip-marker" data-target="#inicio">Inicio</a>
+      <a class="clip-marker" data-target="#trabajos">Trabajos</a>
+      <a class="clip-marker" data-target="#proceso">Proceso</a>
+      <a class="clip-marker" data-target="#servicios">Servicios</a>
+      <a class="clip-marker" data-target="#testimonios">Notas</a>
+      <a class="clip-marker" data-target="#contacto">Contacto</a>
+    </nav>
+    <div class="tc-readout">
+      <span class="dot"></span>
+      <span class="num" id="tcNum">00:00:00:00</span>
+    </div>
+  </div>
+  <div class="scrub-track"><div class="scrub-fill" id="scrubFill"></div></div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section id="inicio" class="hero" style="border-bottom:1px solid var(--line);">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Edición de vídeo — sala de montaje digital</span>
+        <h1>Tu metraje<br>merece un <span class="accent">buen corte</span></h1>
+        <p class="lede">Edito para marcas, artistas y creadores que no se conforman con «queda bien». Montaje, etalonaje y motion graphics con el mismo cuidado que le pondrías tú si tuvieras el tiempo.</p>
+        <div class="cta-row">
+          <a href="#trabajos" class="btn btn-primary">▸ Ver trabajos</a>
+          <a href="#contacto" class="btn btn-ghost">Escríbeme</a>
+        </div>
+      </div>
+
+      <div class="player" id="player">
+        <div class="corner tl"></div><div class="corner tr"></div>
+        <div class="corner bl"></div><div class="corner br"></div>
+        <div class="player-tc" id="playerTc">00:00:02:14</div>
+        <div class="player-inout">IN 00:00 — OUT 02:47</div>
+        <div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="4,3 21,12 4,21"/></svg></div>
+        <div class="player-label">reel_2026_master.mov</div>
+        <div class="waveform" id="waveform"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRABAJOS -->
+  <section id="trabajos">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Bin de proyectos</span>
+        <h2>Trabajos recientes</h2>
+        <p>Una selección de piezas montadas de principio a fin: del volcado de material a la exportación final.</p>
+      </div>
+
+      <div class="grid-work">
+        <div class="clip-card reveal">
+          <div class="clip-thumb"><div class="grad g1"></div><div class="scan"></div><span class="duration-badge">00:38</span></div>
+          <div class="clip-body"><span class="clip-tag">Comercial</span><div class="clip-title">Lanzamiento cápsula — Norte Studio</div></div>
+        </div>
+        <div class="clip-card reveal">
+          <div class="clip-thumb"><div class="grad g2"></div><div class="scan"></div><span class="duration-badge">03:12</span></div>
+          <div class="clip-body"><span class="clip-tag">Música</span><div class="clip-title">Sesión acústica — Mar Vidal</div></div>
+        </div>
+        <div class="clip-card reveal">
+          <div class="clip-thumb"><div class="grad g3"></div><div class="scan"></div><span class="duration-badge">08:47</span></div>
+          <div class="clip-body"><span class="clip-tag">Documental</span><div class="clip-title">Voces del taller</div></div>
+        </div>
+        <div class="clip-card reveal">
+          <div class="clip-thumb"><div class="grad g4"></div><div class="scan"></div><span class="duration-badge">01:24</span></div>
+          <div class="clip-body"><span class="clip-tag">Marca</span><div class="clip-title">Rebranding 2024 — Kappa</div></div>
+        </div>
+        <div class="clip-card reveal">
+          <div class="clip-thumb"><div class="grad g5"></div><div class="scan"></div><span class="duration-badge">00:22</span></div>
+          <div class="clip-body"><span class="clip-tag">Redes sociales</span><div class="clip-title">Serie de reels — Café Lúpulo</div></div>
+        </div>
+        <div class="clip-card reveal">
+          <div class="clip-thumb"><div class="grad g6"></div><div class="scan"></div><span class="duration-badge">02:05</span></div>
+          <div class="clip-body"><span class="clip-tag">Corporativo</span><div class="clip-title">Presentación anual — Fintra</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESO -->
+  <section id="proceso">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Cómo trabajo</span>
+        <h2>Del volcado al render final</h2>
+        <p>Así se ve una edición completa, marcada con los tiempos en los que suele pasar cada cosa.</p>
+      </div>
+
+      <div class="timeline-list">
+        <div class="tstep reveal">
+          <span class="tc">00:00</span>
+          <h3>Brief y visionado</h3>
+          <p>Reviso todo el material en bruto y hablamos de qué historia queremos contar y para quién.</p>
+        </div>
+        <div class="tstep reveal">
+          <span class="tc">00:15</span>
+          <h3>Selección</h3>
+          <p>Marco los mejores momentos, descarto ruido y armo una primera estructura del vídeo.</p>
+        </div>
+        <div class="tstep reveal">
+          <span class="tc">00:32</span>
+          <h3>Montaje</h3>
+          <p>Construyo el ritmo, los cortes y la narrativa. Aquí es donde la pieza empieza a respirar.</p>
+        </div>
+        <div class="tstep reveal">
+          <span class="tc">00:48</span>
+          <h3>Etalonaje y sonido</h3>
+          <p>Color, mezcla de audio, música y motion graphics si la pieza los necesita.</p>
+        </div>
+        <div class="tstep reveal">
+          <span class="tc">01:05</span>
+          <h3>Entrega</h3>
+          <p>Exportamos en los formatos que necesites y afinamos juntos hasta que encaje del todo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section id="servicios" style="padding-bottom:0;">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Qué puedo montarte</span>
+        <h2>Servicios</h2>
+        <p>Cuatro formas de trabajar juntos, a medida de lo que ya tengas grabado.</p>
+      </div>
+    </div>
+
+    <div class="grid-services reveal">
+      <div class="service-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="1"/><path d="M8 6v12M16 6v12"/></svg>
+        <h3>Montaje y edición</h3>
+        <p>Del material en bruto a una pieza con ritmo, estructura y gancho de principio a fin.</p>
+        <div class="service-tags"><span>YouTube</span><span>Publicidad</span><span>Documental</span></div>
+      </div>
+      <div class="service-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18"/></svg>
+        <h3>Etalonaje</h3>
+        <p>Una gama de color coherente que le da personalidad y consistencia a cada plano.</p>
+        <div class="service-tags"><span>Look cinematográfico</span><span>Corrección técnica</span></div>
+      </div>
+      <div class="service-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h13"/></svg>
+        <h3>Motion graphics y rótulos</h3>
+        <p>Transiciones y gráficos animados que refuerzan el mensaje sin distraer del contenido.</p>
+        <div class="service-tags"><span>Lower thirds</span><span>Kinetic type</span></div>
+      </div>
+      <div class="service-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+        <h3>Formatos para redes</h3>
+        <p>Recortes verticales, subtítulos quemados y versiones pensadas para cada plataforma.</p>
+        <div class="service-tags"><span>Reels</span><span>TikTok</span><span>Shorts</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIOS -->
+  <section id="testimonios">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Notas de dirección</span>
+        <h2>Lo que dicen al ver el corte final</h2>
+      </div>
+
+      <div class="grid-notes">
+        <div class="note-card reveal">
+          <span class="note-tc">Nota — 00:12:04</span>
+          <p class="quote">«Diego entendió en dos frases lo que llevábamos semanas intentando explicar. El montaje final tenía más ritmo del que teníamos en el guion.»</p>
+          <div class="note-who"><b>Marta Cifuentes</b> — Norte Studio</div>
+        </div>
+        <div class="note-card reveal">
+          <span class="note-tc">Nota — 00:34:51</span>
+          <p class="quote">«Nunca había visto tan claro el color de mis vídeos. Trató cada plano como si fuera suyo.»</p>
+          <div class="note-who"><b>Mar Vidal</b> — Música</div>
+        </div>
+        <div class="note-card reveal">
+          <span class="note-tc">Nota — 01:02:18</span>
+          <p class="quote">«Entrega puntual, comunicación constante y un ojo brutal para el detalle. Repetiremos seguro.»</p>
+          <div class="note-who"><b>Álvaro Nogués</b> — Kappa</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="contacto">
+    <div class="wrap">
+      <div class="export-panel reveal">
+        <div class="export-titlebar">
+          <span>proyecto_nuevo.export</span>
+          <div class="export-dots"><i></i><i></i><i></i></div>
+        </div>
+        <div class="export-body">
+          <h2>Panel de exportación</h2>
+          <p>Cuéntame qué tienes entre manos y te contesto en menos de 24h.</p>
+
+          <form id="contactForm">
+            <div class="form-row">
+              <div class="field">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" name="nombre" required>
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field" style="grid-column:1/-1;">
+                <label for="tipo">Tipo de proyecto</label>
+                <select id="tipo" name="tipo">
+                  <option>Vídeo comercial</option>
+                  <option>Música / videoclip</option>
+                  <option>Documental</option>
+                  <option>Redes sociales</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:6px;">
+              <label for="mensaje">Mensaje</label>
+              <textarea id="mensaje" name="mensaje" placeholder="Cuéntame de qué va el proyecto, plazos y duración aproximada del material..."></textarea>
+            </div>
+
+            <div class="settings-row">
+              <div>Formato: <b>.MP4</b></div>
+              <div>Resolución: <b>4K</b></div>
+              <div>Códec: <b>sin filtros</b></div>
+              <div>Tiempo de respuesta: <b>&lt; 24h</b></div>
+            </div>
+
+            <button type="submit" class="render-btn"><span id="renderLabel">Renderizar y enviar</span><div class="fill"></div></button>
+          </form>
+
+          <div class="direct-contact">
+            <a href="mailto:hola@diegosoler-edit.com">hola@diegosoler-edit.com</a>
+            <a href="#">Instagram ↗</a>
+            <a href="#">Vimeo ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="fin">FIN</div>
+  <p>DIEGO SOLER · MONTAJE DE VÍDEO · © 2026</p>
+</footer>
+
+<script>
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Waveform bars
+  var wf = document.getElementById('waveform');
+  var barCount = 46;
+  for(var i=0;i<barCount;i++){
+    var b = document.createElement('div');
+    b.className = 'bar';
+    var h = (Math.random()*0.7 + 0.3).toFixed(2);
+    b.style.animationDelay = (Math.random()*1.2).toFixed(2) + 's';
+    b.style.animationDuration = (1.8 + Math.random()*1.2).toFixed(2) + 's';
+    wf.appendChild(b);
+  }
+  if(reduced){ wf.querySelectorAll('.bar').forEach(function(b){ b.style.animation='none'; b.style.transform='scaleY(0.6)'; }); }
+
+  // Scroll progress + timecode
+  var fill = document.getElementById('scrubFill');
+  var tcNum = document.getElementById('tcNum');
+  var FPS = 24;
+
+  function fmtTC(totalFrames){
+    var f = Math.max(0, Math.floor(totalFrames));
+    var hh = Math.floor(f / (3600*FPS));
+    var mm = Math.floor((f % (3600*FPS)) / (60*FPS));
+    var ss = Math.floor((f % (60*FPS)) / FPS);
+    var ff = f % FPS;
+    function p(n){ return (n<10?'0':'')+n; }
+    return p(hh)+':'+p(mm)+':'+p(ss)+':'+p(ff);
+  }
+
+  function onScroll(){
+    var doc = document.documentElement;
+    var scrollTop = window.scrollY || doc.scrollTop;
+    var max = doc.scrollHeight - doc.clientHeight;
+    var pct = max > 0 ? scrollTop / max : 0;
+    fill.style.width = (pct*100).toFixed(2) + '%';
+    tcNum.textContent = fmtTC(pct * 60 * 60 * FPS * 0.5);
+  }
+  document.addEventListener('scroll', function(){ window.requestAnimationFrame(onScroll); }, {passive:true});
+  onScroll();
+
+  // Nav clicks
+  document.querySelectorAll('.clip-marker').forEach(function(m){
+    m.addEventListener('click', function(e){
+      e.preventDefault();
+      var target = document.querySelector(m.getAttribute('data-target'));
+      if(target){ target.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'start'}); }
+    });
+  });
+
+  // Active marker via IntersectionObserver
+  var sections = ['inicio','trabajos','proceso','servicios','testimonios','contacto'].map(function(id){ return document.getElementById(id); });
+  var markers = Array.prototype.slice.call(document.querySelectorAll('.clip-marker'));
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var idx = sections.indexOf(entry.target);
+        markers.forEach(function(m){ m.classList.remove('active'); });
+        if(markers[idx]) markers[idx].classList.add('active');
+      }
+    });
+  }, {rootMargin:'-45% 0px -45% 0px', threshold:0});
+  sections.forEach(function(s){ if(s) io.observe(s); });
+
+  // Reveal on scroll
+  var revealEls = document.querySelectorAll('.reveal');
+  var rio = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){ entry.target.classList.add('in'); rio.unobserve(entry.target); }
+    });
+  }, {threshold:0.12});
+  revealEls.forEach(function(el){ rio.observe(el); });
+
+  // Player timecode ticking
+  var playerTc = document.getElementById('playerTc');
+  if(!reduced){
+    var frame = 0;
+    setInterval(function(){
+      frame = (frame+1) % (FPS*60);
+      playerTc.textContent = fmtTC(frame + FPS*2);
+    }, 1000/FPS);
+  }
+
+  // Contact form -> mailto
+  var form = document.getElementById('contactForm');
+  var renderLabel = document.getElementById('renderLabel');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var nombre = document.getElementById('nombre').value;
+    var tipo = document.getElementById('tipo').value;
+    var mensaje = document.getElementById('mensaje').value;
+    var subject = encodeURIComponent('Proyecto: ' + tipo + ' — ' + nombre);
+    var body = encodeURIComponent(mensaje + '\n\n— ' + nombre);
+    renderLabel.textContent = 'Abriendo tu email…';
+    setTimeout(function(){
+      window.location.href = 'mailto:hola@diegosoler-edit.com?subject=' + subject + '&body=' + body;
+      renderLabel.textContent = 'Renderizar y enviar';
+    }, 500);
+  });
+})();
+</script>
+
+</body>
+</html>
